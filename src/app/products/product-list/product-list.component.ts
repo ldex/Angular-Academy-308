@@ -22,6 +22,7 @@ export class ProductListComponent implements OnInit {
   productsNumber$: Observable<number>;
   filter$: Observable<string>;
   filteredProducts$: Observable<Product[]>;
+  filtered$: Observable<boolean>;
 
   errorMessage;
 
@@ -70,13 +71,6 @@ export class ProductListComponent implements OnInit {
                       .productService
                       .products$;
 
-    this.productsNumber$ = this
-                              .products$
-                              .pipe(
-                                map(products => products.length),
-                                startWith(0)
-                              );
-
     this.filter$ = this.filter.valueChanges
                     .pipe(
                       map(text => text.trim()),
@@ -87,6 +81,12 @@ export class ProductListComponent implements OnInit {
                       tap(text => console.warn(text))
                     );
 
+    this.filtered$ = this
+                      .filter$
+                      .pipe(
+                        map(text => text.length > 0)
+                      )
+
     this.filteredProducts$ = combineLatest([this.products$, this.filter$])
         .pipe(
           map(([products, filterString]) =>
@@ -96,6 +96,12 @@ export class ProductListComponent implements OnInit {
           )
         )
 
+     this.productsNumber$ = this
+        .filteredProducts$
+        .pipe(
+          map(products => products.length),
+          startWith(0)
+        );
   }
 
   refresh() {
