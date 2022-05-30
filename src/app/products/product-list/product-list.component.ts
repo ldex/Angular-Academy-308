@@ -7,6 +7,7 @@ import { tap, catchError, startWith, count, flatMap, map, debounceTime, filter, 
 import { Product } from '../product.interface';
 import { ProductService } from '../product.service';
 import { FavouriteService } from '../favourite.service';
+import { LoadingService } from 'src/app/services/loading.service';
 
 @Component({
   selector: 'app-product-list',
@@ -71,7 +72,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   constructor(
     private productService: ProductService,
     private favouriteService: FavouriteService,
-    private router: Router) {
+    private router: Router,
+    private loadingService: LoadingService) {
   }
 
   ngOnDestroy(): void {
@@ -79,6 +81,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
+
+
    // this.subscription.add(
      this.newFavouriteProduct$ =
             this.favouriteService
@@ -97,6 +102,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.products$ = this
                       .productService
                       .products$;
+
+    this
+      .loadingService
+      .showLoaderUntilCompleted(this.products$);
 
     this.filter$ = this.filter.valueChanges
                     .pipe(

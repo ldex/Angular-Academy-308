@@ -21,11 +21,7 @@
     &nbsp;
 </div>
 
-<ng-template #loading>
-    <h2 class="loading">Loading products</h2>
-</ng-template>
-
-<ul class="products" *ngIf="filteredProducts$ | async as products;else loading">
+<ul class="products" *ngIf="filteredProducts$ | async as products">
     <li *ngFor="let product of products | slice:start:end"
         (click)="onSelect(product)"
         [class.discontinued]="product.discontinued"
