@@ -103,9 +103,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
                       .productService
                       .products$;
 
-    this
-      .loadingService
-      .showLoaderUntilCompleted(this.products$);
+  //  this
+  //     .loadingService
+  //     .showLoaderUntilCompleted(this.products$);
 
     this.filter$ = this.filter.valueChanges
                     .pipe(

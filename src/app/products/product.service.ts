@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { catchError, delay, shareReplay, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, delay, retry, shareReplay, tap } from 'rxjs/operators';
 import { Product } from './product.interface';
+import { delayedRetry } from '../delayedRetry.operator';
 
 @Injectable({
   providedIn: 'root'
