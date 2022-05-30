@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { Observable, EMPTY, combineLatest, Subscription } from 'rxjs';
-import { tap, catchError, startWith, count, flatMap, map, debounceTime, filter } from 'rxjs/operators';
+import { tap, catchError, startWith, count, flatMap, map, debounceTime, filter, distinctUntilChanged } from 'rxjs/operators';
 
 import { Product } from '../product.interface';
 import { ProductService } from '../product.service';
@@ -17,8 +17,15 @@ export class ProductListComponent implements OnInit {
 
   title: string = 'Products';
   selectedProduct: Product;
+
   products$: Observable<Product[]>;
+  productsNumber$: Observable<number>;
+  filter$: Observable<string>;
+  filteredProducts$: Observable<Product[]>;
+
   errorMessage;
+
+  filter: FormControl = new FormControl("");
 
   // Pagination
   pageSize = 5;
@@ -62,10 +69,37 @@ export class ProductListComponent implements OnInit {
     this.products$ = this
                       .productService
                       .products$;
+
+    this.productsNumber$ = this
+                              .products$
+                              .pipe(
+                                map(products => products.length),
+                                startWith(0)
+                              );
+
+    this.filter$ = this.filter.valueChanges
+                    .pipe(
+                      map(text => text.trim()),
+                      filter(text => text == "" || text.length > 3),
+                      debounceTime(500),
+                      distinctUntilChanged(),
+                      startWith(""),
+                      tap(text => console.warn(text))
+                    );
+
+    this.filteredProducts$ = combineLatest([this.products$, this.filter$])
+        .pipe(
+          map(([products, filterString]) =>
+            products.filter(product =>
+              product.name.toLowerCase().includes(filterString.toLowerCase())
+            )
+          )
+        )
+
   }
 
   refresh() {
     this.productService.initProducts();
     this.router.navigateByUrl('/products'); // Self route navigation
-  }  
+  }
 }
