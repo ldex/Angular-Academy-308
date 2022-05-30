@@ -2,6 +2,10 @@
     {{ title }}
 </h2>
 
+<h3 *ngIf="newFavouriteProduct$ | async as newFavouriteProduct">
+    Product {{newFavouriteProduct.name}} added to your favourites.
+</h3>
+
 <div class="right">
     {{ productsNumber$ | async }} products
     <span *ngIf="filtered$ | async">(filtered)</span> /

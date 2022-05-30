@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { Observable, EMPTY, combineLatest, Subscription } from 'rxjs';
@@ -13,16 +13,21 @@ import { FavouriteService } from '../favourite.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
 
   title: string = 'Products';
   selectedProduct: Product;
+
+  subscription: Subscription = new Subscription();
 
   products$: Observable<Product[]>;
   productsNumber$: Observable<number>;
   filter$: Observable<string>;
   filteredProducts$: Observable<Product[]>;
   filtered$: Observable<boolean>;
+
+  newFavouriteProduct: Product;
+  newFavouriteProduct$: Observable<Product>;
 
   errorMessage;
 
@@ -33,6 +38,12 @@ export class ProductListComponent implements OnInit {
   start = 0;
   end = this.pageSize;
   currentPage = 1;
+
+  firstPage() {
+    this.start = 0;
+    this.end = this.pageSize;
+    this.currentPage = 1;
+  }
 
   previousPage() {
     this.start -= this.pageSize;
@@ -63,7 +74,23 @@ export class ProductListComponent implements OnInit {
     private router: Router) {
   }
 
+  ngOnDestroy(): void {
+    //this.subscription.unsubscribe();
+  }
+
   ngOnInit(): void {
+   // this.subscription.add(
+     this.newFavouriteProduct$ =
+            this.favouriteService
+                .favouriteAdded$
+                .pipe(
+                  tap(console.log)
+                )
+            // .subscribe(
+            //   product => this.newFavouriteProduct = product
+            // )
+   // );
+
     // Self url navigation will refresh the page ('Refresh List' button)
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
@@ -78,7 +105,10 @@ export class ProductListComponent implements OnInit {
                       debounceTime(500),
                       distinctUntilChanged(),
                       startWith(""),
-                      tap(text => console.warn(text))
+                      tap(text => {
+                        this.firstPage();
+                        console.log(text)
+                      })
                     );
 
     this.filtered$ = this
